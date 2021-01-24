@@ -3,6 +3,7 @@ package app.movieApi.controller;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,7 +32,12 @@ public class MovieController {
 		if(page.isPresent()) {
 			searchPage = Integer.parseInt(page.get());
 		}
-		return TmdbRequest.findMovies(movie, searchPage);
+		
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.scan("app.movieApi");
+		context.refresh();
+		TmdbRequest tmbdRequest = context.getBean(TmdbRequest.class); 
+		return tmbdRequest.findMovies(movie, searchPage);
 	}
 
 }

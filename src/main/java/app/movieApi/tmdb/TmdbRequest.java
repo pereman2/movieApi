@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -13,23 +11,30 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Service;
 
 import app.movieApi.model.Movie;
 
+@Service
+@PropertySource(value={"classpath:application.properties"})
 public class TmdbRequest {
 
 	private static String MOVIE_SEARCH_URL = "https://api.themoviedb.org/3/search/movie?api_key=%s&language=en-US&query=%s&page=%s&include_adult=false";
 
-	private static String getApiKey() {
-		return System.getenv("MOVIE_API_KEY");
-		//return "{insert_api_key}";
+	@Value("${movie.api.key}")
+	private String apiKey;
+
+	private String getApiKey() {
+		return apiKey;
 	}
 
 	@Cacheable(value="movies")
-	public static ArrayList<Movie> findMovies(String movieName, int page) {
+	public ArrayList<Movie> findMovies(String movieName, int page) {
 		ArrayList<Movie> movies = new ArrayList<Movie>();
-		JSONObject requestResponse = TmdbRequest.searchMovie(movieName, page);
+		JSONObject requestResponse = searchMovie(movieName, page);
 		if(requestResponse == null) { return movies; }
 		JSONArray results = requestResponse.getJSONArray("results");
 		for(int i = 0; i < results.length(); i++) {
@@ -40,7 +45,7 @@ public class TmdbRequest {
 		return movies;
 	}
 
-	private static Movie extractMovie(JSONObject tmdbMovie) throws JSONException {
+	private Movie extractMovie(JSONObject tmdbMovie) throws JSONException {
 		int id = getId(tmdbMovie);
 		String name = getTitle(tmdbMovie);
         float popularity = getPopularity(tmdbMovie);
@@ -52,7 +57,7 @@ public class TmdbRequest {
 		return movie;
 	}
 
-	private static int getId(JSONObject tmdbMovie) throws JSONException {
+	private int getId(JSONObject tmdbMovie) throws JSONException {
 		int id = -1;
 		if(tmdbMovie.has("id")) {
 			id = tmdbMovie.getInt("id");
@@ -60,7 +65,7 @@ public class TmdbRequest {
 		return id;
 	}
 
-	private static String getTitle(JSONObject tmdbMovie) throws JSONException {
+	private String getTitle(JSONObject tmdbMovie) throws JSONException {
 		String name = "";
         if(tmdbMovie.has("title")) {
             name = tmdbMovie.getString("title");
@@ -68,7 +73,7 @@ public class TmdbRequest {
 		return name;
 	}
 
-	private static float getPopularity(JSONObject tmdbMovie) throws JSONException {
+	private float getPopularity(JSONObject tmdbMovie) throws JSONException {
 		float popularity = 0;
         if(tmdbMovie.has("popularity")) {
             popularity = tmdbMovie.getFloat("popularity");
@@ -76,7 +81,7 @@ public class TmdbRequest {
 		return popularity;
 	}
 
-	private static float getVoteAverage(JSONObject tmdbMovie) throws JSONException {
+	private float getVoteAverage(JSONObject tmdbMovie) throws JSONException {
 		float voteAverage = 0;
         if(tmdbMovie.has("popularity")) {
         	voteAverage = tmdbMovie.getFloat("vote_average");
@@ -84,7 +89,7 @@ public class TmdbRequest {
 		return voteAverage;
 	}
 
-	private static int getVotes(JSONObject tmdbMovie) throws JSONException {
+	private int getVotes(JSONObject tmdbMovie) throws JSONException {
 		int votes = -1;
 		if(tmdbMovie.has("votes")) {
 			votes = tmdbMovie.getInt("votes");
@@ -92,7 +97,7 @@ public class TmdbRequest {
 		return votes;
 	}
 
-	private static String getReleaseDate(JSONObject tmdbMovie) throws JSONException {
+	private String getReleaseDate(JSONObject tmdbMovie) throws JSONException {
 		String releaseDate = "";
 		if(tmdbMovie.has("release_date")) {
 			releaseDate = tmdbMovie.getString("release_date");
@@ -100,7 +105,7 @@ public class TmdbRequest {
 		return releaseDate;
 	}
 
-	private static String getOverview(JSONObject tmdbMovie) throws JSONException {
+	private String getOverview(JSONObject tmdbMovie) throws JSONException {
 		String overview = "";
 		if(tmdbMovie.has("overview")) {
 			overview = tmdbMovie.getString("overview");
@@ -108,7 +113,7 @@ public class TmdbRequest {
 		return overview;
 	}
 
-	private static JSONObject searchMovie(String movie, int page) {
+	private JSONObject searchMovie(String movie, int page) {
 		String query_url = String.format(MOVIE_SEARCH_URL, getApiKey(), movie, page);
 		InputStream is;
 		JSONObject json = null;
@@ -124,7 +129,7 @@ public class TmdbRequest {
 		return json;
 	}
 
-	private static String readAll(Reader rd) throws IOException {
+	private String readAll(Reader rd) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		int cp;
 		while ((cp = rd.read()) != -1) {
