@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.cache.annotation.Cacheable;
 
@@ -21,8 +22,8 @@ public class TmdbRequest {
 	private static String MOVIE_SEARCH_URL = "https://api.themoviedb.org/3/search/movie?api_key=%s&language=en-US&query=%s&page=%s&include_adult=false";
 
 	private static String getApiKey() {
-		//return System.getenv("MOVIE_API_KEY");
-		return "16549def09deeb51b0336adff5d70307";
+		return System.getenv("MOVIE_API_KEY");
+		//return "{insert_api_key}";
 	}
 
 	@Cacheable(value="movies")
@@ -33,13 +34,78 @@ public class TmdbRequest {
 		JSONArray results = requestResponse.getJSONArray("results");
 		for(int i = 0; i < results.length(); i++) {
 			JSONObject tmdbMovie = results.getJSONObject(i);
-			int id = tmdbMovie.getInt("id");
-			String name = tmdbMovie.getString("original_title");
-			Movie movie = new Movie(i, name);
-			System.out.println(id + " " + name);
+			Movie movie = extractMovie(tmdbMovie);
 			movies.add(movie);
 		}
 		return movies;
+	}
+
+	private static Movie extractMovie(JSONObject tmdbMovie) throws JSONException {
+		int id = getId(tmdbMovie);
+		String name = getTitle(tmdbMovie);
+        float popularity = getPopularity(tmdbMovie);
+        float voteAverage = getVoteAverage(tmdbMovie);
+		int votes = getVotes(tmdbMovie);
+		String overview = getOverview(tmdbMovie);
+		String releaseDate = getReleaseDate(tmdbMovie);
+		Movie movie = new Movie(id, name, popularity, voteAverage, votes, overview, releaseDate);
+		return movie;
+	}
+
+	private static int getId(JSONObject tmdbMovie) throws JSONException {
+		int id = -1;
+		if(tmdbMovie.has("id")) {
+			id = tmdbMovie.getInt("id");
+		}
+		return id;
+	}
+
+	private static String getTitle(JSONObject tmdbMovie) throws JSONException {
+		String name = "";
+        if(tmdbMovie.has("title")) {
+            name = tmdbMovie.getString("title");
+        }
+		return name;
+	}
+
+	private static float getPopularity(JSONObject tmdbMovie) throws JSONException {
+		float popularity = 0;
+        if(tmdbMovie.has("popularity")) {
+            popularity = tmdbMovie.getFloat("popularity");
+        }
+		return popularity;
+	}
+
+	private static float getVoteAverage(JSONObject tmdbMovie) throws JSONException {
+		float voteAverage = 0;
+        if(tmdbMovie.has("popularity")) {
+        	voteAverage = tmdbMovie.getFloat("vote_average");
+        }
+		return voteAverage;
+	}
+
+	private static int getVotes(JSONObject tmdbMovie) throws JSONException {
+		int votes = -1;
+		if(tmdbMovie.has("votes")) {
+			votes = tmdbMovie.getInt("votes");
+		}
+		return votes;
+	}
+
+	private static String getReleaseDate(JSONObject tmdbMovie) throws JSONException {
+		String releaseDate = "";
+		if(tmdbMovie.has("release_date")) {
+			releaseDate = tmdbMovie.getString("release_date");
+		}
+		return releaseDate;
+	}
+
+	private static String getOverview(JSONObject tmdbMovie) throws JSONException {
+		String overview = "";
+		if(tmdbMovie.has("overview")) {
+			overview = tmdbMovie.getString("overview");
+		}
+		return overview;
 	}
 
 	private static JSONObject searchMovie(String movie, int page) {
@@ -53,7 +119,6 @@ public class TmdbRequest {
 			String jsonText = readAll(rd);
 			json = new JSONObject(jsonText);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return json;
@@ -66,11 +131,6 @@ public class TmdbRequest {
 			sb.append((char) cp);
 		}
 		return sb.toString();
-	}
-
-	public static void main(String[] args) throws IOException {
-		String movie = "wolve";
-		findMovies(movie, 1);
 	}
 
 }
