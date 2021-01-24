@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.PropertySource;
@@ -19,17 +20,12 @@ import org.springframework.stereotype.Service;
 import app.movieApi.model.Movie;
 
 @Service
-@PropertySource(value={"classpath:application.properties"})
 public class TmdbRequest {
 
 	private static String MOVIE_SEARCH_URL = "https://api.themoviedb.org/3/search/movie?api_key=%s&language=en-US&query=%s&page=%s&include_adult=false";
 
 	@Value("${movie.api.key}")
 	private String apiKey;
-
-	private String getApiKey() {
-		return apiKey;
-	}
 
 	@Cacheable(value="movies")
 	public ArrayList<Movie> findMovies(String movieName, int page) {
@@ -114,7 +110,7 @@ public class TmdbRequest {
 	}
 
 	private JSONObject searchMovie(String movie, int page) {
-		String query_url = String.format(MOVIE_SEARCH_URL, getApiKey(), movie, page);
+		String query_url = String.format(MOVIE_SEARCH_URL, apiKey, movie, page);
 		InputStream is;
 		JSONObject json = null;
 		try {

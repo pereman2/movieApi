@@ -3,6 +3,7 @@ package app.movieApi.controller;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,10 @@ import app.movieApi.tmdb.TmdbRequest;
 
 @RestController
 public class MovieController {
+
+
+	@Autowired
+	private TmdbRequest tmbdRequest;
 
 	/** 
 	 * Searches for a list of movies with the name provided 
@@ -33,10 +38,6 @@ public class MovieController {
 			searchPage = Integer.parseInt(page.get());
 		}
 		
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.scan("app.movieApi");
-		context.refresh();
-		TmdbRequest tmbdRequest = context.getBean(TmdbRequest.class); 
 		return tmbdRequest.findMovies(movie, searchPage);
 	}
 
