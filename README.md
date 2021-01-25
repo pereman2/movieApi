@@ -8,15 +8,19 @@
 
 ## Setup and execution
 
-1. Maven clean, maven install
-2. `java -jar -Dmovie.api.key={insert_your_api_key_here} app.jar`.
-Alternatively, run app.jar.
+**Run**
 
-**test**
+`./mvnw spring-boot:run -Drun.arguments=--movie.api.key={insert_your_api_key_here}`
 
-`http://localhost:8080/auth?user=randomname&password=test123` 
+(it also builds on target)
 
-`http://localhost:8080/movies/shrek?page=1`(with authorization)
+**Test**
+
+Run and then:
+
+1. `curl -X POST "http://localhost:8080/auth?user=randomname&password=test123"`
+
+2. `curl -v "http://localhost:8080/movies/x?page=1" -H "Authorization: Bearer ..."`
 
 ## endpoints 
 
