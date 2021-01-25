@@ -6,13 +6,10 @@
 - jwst
 - jmdb
 
-## setup
+## Setup and execution
 
-Firstly it's mandatory exporting the following environment variable:
-
-`export MOVIE_API_KEY="{insert_provided_api_key}"`
-
-Moving on, you can maven clean, maven install and `java -jar` the jar encountered in target.
+1. Maven clean, maven install
+2. `java -jar -Dmovie.api.key={insert_your_api_key_here} app.jar`.
 Alternatively, run app.jar.
 
 **test**
