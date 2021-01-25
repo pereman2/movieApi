@@ -10,7 +10,7 @@
 
 **Run**
 
-`./mvnw spring-boot:run -Drun.arguments=--movie.api.key={insert_your_api_key_here}`
+`./mvnw spring-boot:run -Dspring-boot.run.arguments=--movie.api.key={insert_your_api_key_here}`
 
 (it also builds on target)
 
